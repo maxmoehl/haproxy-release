@@ -1,0 +1,12 @@
+[submodule "src/haproxy"]
+	path = src/haproxy
+	url = https://git.haproxy.org/git/haproxy-2.8.git
+[submodule "src/pcre2"]
+	path = src/pcre2
+	url = https://github.com/PCRE2Project/pcre2
+[submodule "src/socat"]
+	path = src/socat
+	url = https://repo.or.cz/socat.git
+[submodule "src/hatop"]
+	path = src/hatop
+	url = https://github.com/jhunt/hatop

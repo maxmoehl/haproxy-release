@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -e
+
+RUN_DIR=/var/vcap/sys/run/haproxy
+LOG_DIR=/var/vcap/sys/log/haproxy
+PID_FILE="${RUN_DIR}/pid"
+
+case $1 in
+  start)
+    mkdir -p "${RUN_DIR}" "${LOG_DIR}"
+    chown -R vcap:vcap "${RUN_DIR}" "${LOG_DIR}"
+
+    cd "${RUN_DIR}"
+
+    exec /var/vcap/packages/haproxy/bin/haproxy -W \
+      -p "${PID_FILE}" \
+      -f /var/vcap/jobs/haproxy/config/haproxy.conf \
+      -S 127.0.0.1:9001 \
+      >>  "${LOG_DIR}/haproxy.stdout.log" \
+      2>> "${LOG_DIR}/haproxy.stderr.log"
+    ;;
+
+  stop)
+    # SIGUSR1 initiates a soft-stop of HAProxy.
+    PID="$(cat "${PID_FILE}")"
+    kill -USR1 "${PID}"
+    while kill -0 "${PID}"; do sleep 1; done
+    rm -f "${PID_FILE}"
+    ;;
+
+  *)
+    echo "Usage: ctl ( start | stop )"
+    exit 1
+    ;;
+esac

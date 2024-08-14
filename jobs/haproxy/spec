@@ -1,0 +1,13 @@
+name: haproxy
+
+templates:
+  ctl.erb:          bin/ctl
+  haproxy.conf.erb: config/haproxy.conf
+
+packages: []
+
+properties:
+  haproxy.config:
+    description: |
+      Complete, valid configuration for HAProxy. See https://docs.haproxy.org/2.8/configuration.html
+      for details on how to configure HAProxy.
