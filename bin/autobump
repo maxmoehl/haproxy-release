@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Usage: bump SRC_DIR TAG_PATTERN
+bump() {
+  src_dir="${1:?error: bump: missing src_dir}"
+  tag_pattern="${2:?error: bump: missing tag_pattern}"
+  name="$(basename "${src_dir}")"
+
+  current_version="$(git -C "${src_dir}" describe --tags HEAD)"
+  latest_version="$(git -C "${src_dir}" tag --sort=creatordate | grep -E "${tag_pattern}" | tail -n1)"
+
+  if [[ "${current_version}" = "${latest_version}" ]]; then
+    return
+  fi
+
+  git -C "${src_dir}" checkout "${latest_version}"
+
+  git add "${src_dir}"
+
+  git commit -m "dep(${name}): bump from ${current_version} to ${latest_version}"
+  # TODO: can we somehow include the relevant section(s) from the CHANGELOG here?
+}
+
+bump src/haproxy '^v\d+\.\d+\.\d+$'
+bump src/hatop   '^v\d+\.\d+\.\d+$'
+bump src/pcre2   '^pcre2-\d+\.\d+$'
+bump src/socat   '^tag-\d+\.\d+\.\d+\.\d+$'
