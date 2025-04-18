@@ -1,13 +1,110 @@
 name: haproxy
 
 templates:
-  ctl.erb:          bin/ctl
-  haproxy.conf.erb: config/haproxy.conf
+  haproxy.cfg.erb: config/haproxy.cfg
+  aux.ttar.erb:    config/aux.ttar
+  ctl.erb:         bin/ctl
+  pre-stop.erb:    bin/pre-stop
+  drain.erb:       bin/drain
+  post-stop.erb:   bin/post-stop
+  pre-start.erb:   bin/pre-start
+  post-start.erb:  bin/post-start
+  post-deploy.erb: bin/post-deploy
 
-packages: []
+packages:
+- haproxy
 
 properties:
   haproxy.config:
     description: |
       Complete, valid configuration for HAProxy. See https://docs.haproxy.org/2.8/configuration.html
       for details on how to configure HAProxy.
+  haproxy.auxillary_files:
+    description: |
+      Provide auxillary files referenced in the main HAProxy configuration file. The file will be
+      passed to ttar (https://github.com/ideaship/ttar) for unpacking into the config/aux directory
+      of the job. See the pre-start property for details.
+    example: |
+      # Archive created by ttar -C aux -f aux.ttar -c .
+      Directory: .
+      Mode: 755
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Directory: ./certs
+      Mode: 755
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Path: ./certs/ca-1.pem
+      Lines: 1
+      some certificate PEM...
+      Mode: 644
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Path: ./certs/cert-0.pem
+      Lines: 1
+      some certificate and private key PEM...
+      Mode: 644
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Path: ./certs/cert-1.pem
+      Lines: 1
+      some certificate and private key PEM...
+      Mode: 644
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+      Path: ./crt-list
+      Lines: 2
+      /var/vcap/jobs/haproxy/config/aux/certs/cert-0.pem [] !*
+      /var/vcap/jobs/haproxy/config/aux/certs/cert-1.pem [ca-file /var/vcap/jobs/haproxy/config/aux/certs/ca-1.pem very optional] secure.example.com
+      Mode: 644
+      # ttar - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  haproxy.scripts.pre-stop:
+    description: |
+      Pre-stop script which is called during the pre-stop phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+    default: |
+      #!/bin/sh
+      exit 0
+  haproxy.scripts.drain:
+    description: |
+      Drain script which is called during the draining phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+    example: |
+      #!/bin/sh
+
+      set -e
+
+      kill -USR2 "$(cat /var/vcap/sys/run/haproxy/pid)"
+    default: |
+      #!/bin/sh
+      exit 0
+  haproxy.scripts.post-stop:
+    description: |
+      Post-stop script which is called during the post-stop phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+    default: |
+      #!/bin/sh
+      exit 0
+  haproxy.scripts.pre-start:
+    description: |
+      Pre-start script which is called during the pre-start phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+
+      If you provide a script and still want to use the auxillary files property, make sure to copy
+      the logic from the default value to ensure the files are still properly unpacked. Changes to
+      the default value of this are considered a breaking change, so watch out for those.
+    default: |
+      #!/bin/sh
+      set -e
+
+      mkdir -p /var/vcap/jobs/haproxy/config/aux/
+      /var/vcap/packages/haproxy/bin/ttar -C /var/vcap/jobs/haproxy/config/aux/ -x -f /var/vcap/jobs/haproxy/config/aux.ttar
+  haproxy.scripts.post-start:
+    description: |
+      Post-start script which is called during the post-start phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+    default: |
+      #!/bin/sh
+      exit 0
+  haproxy.scripts.post-deploy:
+    description: |
+      Post-start script which is called during the post-start phase. See the BOSH documentation for
+      details: https://bosh.io/docs/job-lifecycle/.
+    default: |
+      #!/bin/sh
+      exit 0

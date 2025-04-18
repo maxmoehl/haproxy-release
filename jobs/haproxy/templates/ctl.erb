@@ -15,17 +15,16 @@ case $1 in
 
     exec /var/vcap/packages/haproxy/bin/haproxy -W \
       -p "${PID_FILE}" \
-      -f /var/vcap/jobs/haproxy/config/haproxy.conf \
+      -f /var/vcap/jobs/haproxy/config/haproxy.cfg \
       -S 127.0.0.1:9001 \
       >>  "${LOG_DIR}/haproxy.stdout.log" \
       2>> "${LOG_DIR}/haproxy.stderr.log"
     ;;
 
   stop)
-    # SIGUSR1 initiates a soft-stop of HAProxy.
-    PID="$(cat "${PID_FILE}")"
-    kill -USR1 "${PID}"
-    while kill -0 "${PID}"; do sleep 1; done
+    # This script does not handle any soft-stop logic. If a soft-stop is desired it should be
+    # implemented by using the lifecycle scripts exposed via config properties.
+    kill -TERM "$(cat "${PID_FILE}")"
     rm -f "${PID_FILE}"
     ;;
 
