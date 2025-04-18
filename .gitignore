@@ -1,0 +1,10 @@
+/config/private.yml
+/dev_releases
+.dev_builds
+.DS_Store
+*.swp
+*~
+tmp
+
+/.vscode
+/.idea
