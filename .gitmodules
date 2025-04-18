@@ -10,3 +10,6 @@
 [submodule "src/hatop"]
 	path = src/hatop
 	url = https://github.com/jhunt/hatop
+[submodule "src/ttar"]
+	path = src/ttar
+	url = https://github.com/ideaship/ttar

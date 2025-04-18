@@ -23,6 +23,10 @@ pushd src/hatop
   install bin/hatop "${BOSH_INSTALL_TARGET}"
 popd
 
+pushd src/ttar
+  install ttar "${BOSH_INSTALL_TARGET}/bin"
+popd
+
 pushd src/haproxy
   make \
     TARGET=linux-glibc \
