@@ -20,7 +20,7 @@ pushd src/socat
 popd
 
 pushd src/hatop
-  install bin/hatop "${BOSH_INSTALL_TARGET}"
+  install bin/hatop "${BOSH_INSTALL_TARGET}/bin"
 popd
 
 pushd src/ttar
