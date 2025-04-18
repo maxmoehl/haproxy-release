@@ -4,4 +4,4 @@ name: haproxy
 dependencies: []
 
 files:
-- **/*
+- '**/*'
